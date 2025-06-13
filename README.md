@@ -152,7 +152,5 @@ npm run preview      # Preview del build de producción
 
 # Linting y Type Checking
 npm run type-check   # Verificación de tipos TypeScript
-```:root {
-  --primary-color: #your-color;
-  --background-color: #f9f9f9;
-}Esta documentación cubre todos los aspectos importantes del proyecto basándome en la información disponible en los archivos. Incluye la arquitectura, dependencias, estructura, componentes y guías para desarrollo y contribución.
+```
+Esta documentación cubre todos los aspectos importantes del proyecto basándome en la información disponible en los archivos. Incluye la arquitectura, dependencias, estructura, componentes y guías para desarrollo y contribución.
