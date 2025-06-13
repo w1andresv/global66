@@ -16,3 +16,33 @@
   background: #f9f9f9;
 }
 
+/* Media queries globales */
+
+/* Dispositivos muy pequeños (móviles, menos de 480px) */
+@media screen and (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* Dispositivos móviles medianos (481px a 768px) */
+@media screen and (min-width: 481px) and (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+/* Tablets y escritorios pequeños (769px a 1200px) */
+@media screen and (min-width: 769px) and (max-width: 1200px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Pantallas grandes (más de 1200px) */
+@media screen and (min-width: 1201px) {
+  html {
+    font-size: 18px;
+  }
+}
+

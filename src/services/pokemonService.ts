@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Pokemon } from '../models/pokemon.interface';
+import type { PokemonDetail } from '../models/pokemon.interface';
 import type { PokemonResponse } from '../models/pokemonResponse.interface';
 
 const BASE_URL = import.meta.env.VITE_POKE_API;
@@ -9,9 +9,6 @@ const api = axios.create( {
     timeout: 10000,
 } );
 
-export const print = () => {
-    console.log( 'api', BASE_URL );
-};
 
 export const getPokemonList = async (): Promise<PokemonResponse[]> => {
     try {
@@ -23,7 +20,7 @@ export const getPokemonList = async (): Promise<PokemonResponse[]> => {
     }
 };
 
-export const getPokemonDetail = async ( nameOrId: string | number ): Promise<Pokemon> => {
+export const getPokemonDetail = async ( nameOrId: string | number ): Promise<PokemonDetail> => {
     try {
         const { data } = await api.get( `/${ nameOrId }` );
         return data;

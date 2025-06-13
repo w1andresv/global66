@@ -1,28 +1,27 @@
 <template>
-  <div class="tabs">
-    <v-btn @click="$emit('change-tab', 'all')"
-           rounded="xl"
-           color="primary"
-           size="large">
-      <i class="icon">☰</i> All
+
+  <v-bottom-navigation>
+    <v-btn value="recent" @click="$emit('change-tab', 'all')">
+      <v-icon>mdi-history</v-icon>
+      <span>Recent</span>
     </v-btn>
-    <v-btn @click="$emit('change-tab', 'favorites')"
-           rounded="xl"
-           size="large">
-      <i class="icon">⭐</i> Favorites
+
+    <v-btn value="favorites" @click="$emit('change-tab', 'favorites')">
+      <v-icon>mdi-heart</v-icon>
+      <span>Favorites</span>
     </v-btn>
-  </div>
+  </v-bottom-navigation>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { defineProps } from 'vue';
 
-defineProps({
+defineProps( {
   activeTab: {
     type: String,
     required: true
   }
-});
+} );
 
 // defineEmits(['change-tab']);
 </script>
