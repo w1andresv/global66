@@ -1,3 +1,4 @@
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -12,8 +13,8 @@
   -moz-osx-font-smoothing: grayscale;
 
 }
-.v-main{
-  background: #f9f9f9;
+main{
+  background-color: #F9F9F9 !important;
 }
 
 /* Media queries globales */

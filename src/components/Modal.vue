@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { defineEmits, defineProps } from 'vue';
+import { defineEmits, defineProps, ref } from 'vue';
+
 
 // Definición de la interfaz del Pokémon
 interface Pokemon {
@@ -9,12 +10,13 @@ interface Pokemon {
   weight: number | null;
   height: number | null;
   types: string[];
+  favorite: boolean;
 }
 
 // 1. Definir las props que el componente padre puede pasar
 const props = defineProps( {
-  // Para que v-model funcione en el componente padre, necesitamos una prop 'modelValue'
-  // y un evento 'update:modelValue'.
+  // Para que v-model funcione en el componente padre, necesitamos una prop 'visible'
+  // y un evento 'update:visible'.
   visible: {
     type: Boolean,
     default: false,
@@ -27,43 +29,37 @@ const props = defineProps( {
       imageUrl: '',
       weight: null,
       height: null,
-      types: []
+      types: [],
+      favorite: false
     } )
-  },
-  isFavorite: {
-    type: Boolean,
-    default: false
   }
 } );
+const snackbar = ref<boolean>( false );
 
 const emit = defineEmits<{
   ( e: 'update:visible', value: boolean ): void;
   ( e: 'close' ): void;
-  ( e: 'toggle-favorite', pokemonId: number | null ): void
 }>();
 
 const closeModal = () => {
-  console.log( 'ASDASDASD' );
   emit( 'update:visible', false );
   emit( 'close' );
 };
 
-const toggleFavorite = () => {
-  emit( 'toggle-favorite', props.pokemon.id );
-};
 
-const sharePokemon = async (pokemon: Pokemon): Promise<void> => {
+const sharePokemon = async ( pokemon: Pokemon ): Promise<void> => {
   const pokemonData = [
     pokemon.name,
-    `weight: ${pokemon.weight}`,
-    `height: ${pokemon.height}`,
-    `types: ${pokemon.types.join(', ')}`
+    `weight: ${ pokemon.weight }`,
+    `height: ${ pokemon.height }`,
+    `types: ${ pokemon.types.join( ', ' ) }`
   ];
 
   try {
-    await navigator.clipboard.writeText(pokemonData.join(', '));
-  } catch (err) {
-    console.error('Failed to copy text: ', err);
+    await navigator.clipboard.writeText( pokemonData.join( ', ' ) );
+    snackbar.value = true;
+  } catch ( err ) {
+    console.error( 'Failed to copy text: ', err );
   }
 };
 </script>
@@ -106,16 +102,21 @@ const sharePokemon = async (pokemon: Pokemon): Promise<void> => {
 
       <v-spacer></v-spacer>
       <div class="buttons">
-        <v-btn @click="sharePokemon"
+        <v-btn @click="sharePokemon(pokemon)"
                rounded="xl"
+               class="text-none"
                color="primary"
                size="large">
           Share to my friends
         </v-btn>
-        <img @click="toggleFavorite" :src="`../../src/assets/images/${isFavorite?'fav-':''}star.svg`">
+        <img :src="`../../src/assets/images/${pokemon.favorite?'fav-':''}star.svg`">
       </div>
     </v-card>
   </v-dialog>
+
+  <v-snackbar v-model="snackbar" :timeout="2000">
+    Datos copiados
+  </v-snackbar>
 </template>
 
 <style scoped>

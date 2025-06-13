@@ -1,6 +1,8 @@
 <template>
-  <div class="pokemon-list-item" @click="openDetail">
-    <span class="pokemon-name">{{ pokemon.name }}</span>
+  <div class="pokemon-list-item">
+    <div class="name" @click="openDetail">
+      <span class="pokemon-name">{{ pokemon.name }}</span>
+    </div>
     <img @click="toggleFavorite" :src="`../../src/assets/images/${pokemon?.favorite?'fav-':''}star.svg`">
   </div>
 </template>
@@ -38,7 +40,6 @@ const openDetail = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 15px;
   cursor: pointer;
   border-radius: 5px;
   height: 60px;
@@ -54,8 +55,22 @@ const openDetail = () => {
   border-bottom: none;
 }
 
+.pokemon-list-item .name {
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  display: flex;
+
+}
+
 .pokemon-list-item span {
+  padding-left: 12px;
   font-size: 1.1em;
+  color: #333;
+}
+
+.pokemon-list-item img {
+  padding-right: 12px;
   color: #333;
 }
 

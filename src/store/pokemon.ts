@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 // Opcional: Interfaz para el estado si quieres un tipado estricto
 interface PokemonStoreState {
     favoritePokemons: string[];
+    searchText: string;
 }
 
 export const usePokemonStore = defineStore( 'pokemon', {
@@ -10,6 +11,7 @@ export const usePokemonStore = defineStore( 'pokemon', {
         // Inicializamos con un array vacío.
         // Podrías cargarlo desde localStorage aquí si quisieras persistencia.
         favoritePokemons: [],
+        searchText: ''
     } ),
     getters: {
         // Getter para verificar si un Pokémon es favorito
@@ -19,6 +21,9 @@ export const usePokemonStore = defineStore( 'pokemon', {
         // Getter para obtener el número total de favoritos
         favoriteCount: ( state ): number => {
             return state.favoritePokemons.length;
+        },
+        getSearchText: ( state ): string => {
+            return state.searchText;
         },
     },
     actions: {
@@ -33,13 +38,20 @@ export const usePokemonStore = defineStore( 'pokemon', {
                 this.favoritePokemons.splice( index, 1 );
             }
             // Opcional: Persistir en localStorage después de cada cambio
-            localStorage.setItem('favoritePokemons', JSON.stringify(this.favoritePokemons));
+            localStorage.setItem( 'favoritePokemons', JSON.stringify( this.favoritePokemons ) );
         },
         // Opcional: Cargar favoritos desde localStorage al inicio
         loadFavorites() {
             const storedFavorites = localStorage.getItem( 'favoritePokemons' );
             if( storedFavorites ) {
                 this.favoritePokemons = JSON.parse( storedFavorites );
+            }
+        },
+        setSearchText( value: string ) {
+            // Solo actualizamos si el valor ha cambiado realmente
+            if (this.searchText !== value) {
+                this.searchText = value;
+                console.log('Store searchText updated:', value);
             }
         }
     },

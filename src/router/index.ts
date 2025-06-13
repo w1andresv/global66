@@ -10,8 +10,8 @@ const routes = [
     },
     {
         path: '/list',
-        name: 'PokemonsListView',
-        component: () => loadComponent("PokemonsListView"),
+        name: 'PokemonsCatalog',
+        component: () => loadComponent("PokemonsCatalogView"),
     },
 
     {

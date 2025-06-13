@@ -13,4 +13,7 @@
 </script>
 
 <style scoped>
+v-main{
+  background-color: #F9F9F9 !important;
+}
 </style>
