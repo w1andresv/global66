@@ -27,34 +27,23 @@
 /**
  * Importaciones de Vue y Composition API
  */
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 
 /**
  * Importaciones de componentes internos
  */
 import PokemonListItem from './PokemonListItem.vue';
 import BottomBar from './BottomBar.vue';
-import SearchBar from '@/components/SearchBar.vue';
-import Modal from '@/components/Modal.vue';
-
-/**
- * Importaciones de servicios y APIs
- */
-import { getPokemonDetail, getPokemonList } from '../services/pokemonService.ts';
-
-/**
- * Importaciones de interfaces y tipos
- */
-import type { PokemonResponse } from '@/models/pokemonResponse.interface.ts';
+import SearchBar from '../components/SearchBar.vue';
+import Modal from '../components/Modal.vue';
 
 /**
  * Importaciones de store para gestión de estado
  */
-import { usePokemonStore } from '@/store/pokemon.ts';
+import { usePokemonStore } from '../store/pokemon.ts';
+import { usePokemonData } from '../composables/usePokemonData.ts';
+import type { PokemonResponse } from '../models/pokemonResponse.interface.ts';
 
-// ===============================
-// DEFINICIÓN DE VARIABLES REACTIVAS
-// ===============================
 
 /**
  * Store global de Pokémon para gestionar favoritos y búsqueda
@@ -62,138 +51,13 @@ import { usePokemonStore } from '@/store/pokemon.ts';
  */
 const pokemonStore = usePokemonStore();
 
-/**
- * Estado de carga para mostrar/ocultar el loader animado
- * @type {Ref<boolean>} - true durante la carga inicial, false cuando los datos están listos
- */
-const loading = ref( false );
-
-/**
- * Estado del diálogo modal para detalles de Pokémon
- * @type {Ref<boolean>} - true cuando el modal está abierto, false cuando está cerrado
- */
-const dialog = ref( false );
-
-/**
- * Tab actualmente seleccionada en la barra de navegación inferior
- * @type {Ref<string>} - Puede ser 'all' (todos los Pokémon) o 'favorites' (solo favoritos)
- */
-const activeTab = ref( 'all' );
-
-/**
- * Lista reactiva que almacena todos los Pokémon obtenidos de la API
- * Esta es la fuente principal de datos que se filtra según las interacciones del usuario
- * @type {Array<PokemonResponse>} - Array reactivo de objetos Pokémon
- */
-let pokemons = reactive<PokemonResponse[]>( [] );
-
-/**
- * Almacena los datos detallados del Pokémon seleccionado para visualización en el modal
- * @type {Object} - Contiene nombre, altura, peso, tipos, imagen y estado de favorito
- */
-let selectePokemon = reactive<any>( null );
-
-
-// ===============================
-// LIFECYCLE HOOKS
-// ===============================
-
-/**
- * Hook del ciclo de vida que se ejecuta cuando el componente es montado en el DOM
- * Realiza 3 acciones principales:
- * 1. Carga los Pokémon favoritos desde localStorage
- * 2. Inicia la petición a la API para obtener la lista de Pokémon
- * 3. Configura el estado de carga con animación
- *
- * @lifecycle onMounted - Se ejecuta después de que el componente es insertado en el DOM
- */
-onMounted( () => {
-  // Carga favoritos guardados en localStorage
-  pokemonStore.loadFavorites();
-
-  // Inicia la petición asíncrona para obtener los datos de la API
-  getList();
-
-  // Activa el loader durante la carga inicial
-  loading.value = true;
-
-  // Simula un tiempo de carga con animación para mejor UX
-  // En una app real, esto podría estar vinculado directamente a la finalización de peticiones
-  setTimeout( () => {
-    loading.value = false;
-  }, 1000 );
-} );
-
-// ===============================
-// MÉTODOS Y FUNCIONES
-// ===============================
-
-/**
- * Maneja el cambio de tab en la barra de navegación inferior
- * Actualiza el estado local para filtrar la lista según la selección
- * 
- * @param {string} tab - El tab seleccionado ('all' o 'favorites')
- */
-const handleChangeTab = ( tab: string ) => {
-  activeTab.value = tab;
-};
-
-/**
- * Obtiene la lista de Pokémon desde el servicio API y configura el estado local
- * Este método realiza las siguientes acciones:
- * 1. Llama al servicio para obtener la lista completa de Pokémon
- * 2. Marca los Pokémon favoritos según el estado del store
- * 3. Añade los resultados al array reactivo
- * 
- * @async
- * @function getList
- * @returns {Promise<void>}
- */
-const getList = async () => {
-  // Obtiene la lista desde el servicio API
-  const list = await getPokemonList();
-
-  // Marca cada Pokémon como favorito o no según el estado guardado
-  list.map( ( item ) => {
-    item.favorite = pokemonStore.isFavorite( item.name );
-  } );
-
-  // Añade los resultados al array reactivo local
-  pokemons.push( ...list );
-};
-
-
-/**
- * Manejador para el evento de clic en botón de favorito
- * Actúa como método intermediario que llama a setFavorite con los parámetros adecuados
- * 
- * @param {string} event - Nombre del Pokémon a marcar/desmarcar como favorito
- */
-const handlerItemClick = ( event: string ) => {
-  setFavorite( pokemons, event );
-};
-
-/**
- * Marca o desmarca un Pokémon como favorito y actualiza tanto el store como la UI
- * Este método realiza dos acciones principales:
- * 1. Actualiza el estado global en el store (con persistencia en localStorage)
- * 2. Actualiza el estado local para reflejar el cambio inmediatamente en la UI
- * 
- * @param {PokemonResponse[]} pokemons - Lista de Pokémon donde se buscará el objetivo
- * @param {string} event - Nombre del Pokémon a marcar/desmarcar como favorito
- */
-const setFavorite = ( pokemons: PokemonResponse[], event: string ) => {
-  // Actualiza el estado global en el store (con persistencia)
-  pokemonStore.toggleFavorite( event );
-
-  // Actualiza el estado local para reflejar el cambio en la UI
-  pokemons.map( ( pokemon: PokemonResponse ) => {
-    if( pokemon.name === event ) {
-      pokemon.favorite = !pokemon.favorite;
-    }
-  } );
-};
-
+const {
+  pokemons,
+  loadPokemonList,
+  loadPokemonDetail,
+  toggleFavorite,
+  loading
+} = usePokemonData();
 
 /**
  * Propiedad computada que filtra la lista de Pokémon según múltiples criterios
@@ -202,14 +66,13 @@ const setFavorite = ( pokemons: PokemonResponse[], event: string ) => {
  * - El texto de búsqueda en el store
  * - La tab activa (todos/favoritos)
  * - La lista base de Pokémon
- * 
+ *
  * @type {ComputedRef<PokemonResponse[]>}
  * @returns {PokemonResponse[]} Lista filtrada de Pokémon según los criterios actuales
  */
 const filteredItems = computed<PokemonResponse[]>( () => {
   // Comenzamos con la lista completa
   let filtered = pokemons;
-
   // FILTRO 1: Por texto de búsqueda (si existe)
   const currentSearchText = pokemonStore.getSearchText;
   if( currentSearchText && currentSearchText !== '' ) {
@@ -229,15 +92,75 @@ const filteredItems = computed<PokemonResponse[]>( () => {
 
 
 /**
+ * Estado del diálogo modal para detalles de Pokémon
+ * @type {Ref<boolean>} - true cuando el modal está abierto, false cuando está cerrado
+ */
+const dialog = ref( false );
+
+/**
+ * Tab actualmente seleccionada en la barra de navegación inferior
+ * @type {Ref<string>} - Puede ser 'all' (todos los Pokémon) o 'favorites' (solo favoritos)
+ */
+const activeTab = ref( 'all' );
+let selectedPokemon = reactive<any>( null );
+
+// ===============================
+// LIFECYCLE HOOKS
+// ===============================
+
+/**
+ * Hook del ciclo de vida que se ejecuta cuando el componente es montado en el DOM
+ * Realiza 3 acciones principales:
+ * 1. Carga los Pokémon favoritos desde localStorage
+ * 2. Inicia la petición a la API para obtener la lista de Pokémon
+ * 3. Configura el estado de carga con animación
+ *
+ * @lifecycle onMounted - Se ejecuta después de que el componente es insertado en el DOM
+ */
+onMounted( async () => {
+  // Carga favoritos guardados en localStorage
+  pokemonStore.loadFavorites();
+  setTimeout( () => {
+    loadPokemonList();
+  }, 500 );
+} );
+
+// ===============================
+// MÉTODOS Y FUNCIONES
+// ===============================
+
+/**
+ * Maneja el cambio de tab en la barra de navegación inferior
+ * Actualiza el estado local para filtrar la lista según la selección
+ *
+ * @param {string} tab - El tab seleccionado ('all' o 'favorites')
+ */
+const handleChangeTab = ( tab: string ) => {
+  activeTab.value = tab;
+};
+
+
+/**
+ * Manejador para el evento de clic en botón de favorito
+ * Actúa como método intermediario que llama a setFavorite con los parámetros adecuados
+ *
+ * @param {string} event - Nombre del Pokémon a marcar/desmarcar como favorito
+ */
+const handlerItemClick = ( event: string ) => {
+  toggleFavorite( event );
+};
+
+
+/**
  * Abre el modal con los detalles de un Pokémon específico
  * Primero obtiene los datos detallados y luego muestra el modal
- * 
+ *
  * @async
  * @param {string} event - Nombre del Pokémon cuyos detalles se desean ver
  */
 const openDetail = async ( event: string ) => {
   // Obtiene los datos detallados del Pokémon
-  await getDetail( event );
+  selectedPokemon = await loadPokemonDetail( event );
   // Muestra el modal
   dialog.value = true;
 };
@@ -250,34 +173,11 @@ const closeModal = () => {
 };
 
 /**
- * Obtiene información detallada de un Pokémon desde la API
- * Formatea los datos para su visualización en el modal
- * 
- * @async
- * @param {string} value - Nombre del Pokémon a consultar
- * @returns {Promise<void>}
- */
-const getDetail = async ( value: string ) => {
-  // Obtiene datos detallados y los desestructura
-  const { height, name, sprites: { other: images }, types, weight } = await getPokemonDetail( value );
-
-  // Configura el objeto reactivo con los datos formateados
-  selectePokemon = {
-    name,
-    height,
-    weight,
-    imageUrl: images?.[ 'official-artwork' ].front_default,
-    types: types.map( t => t.type.name ),
-    favorite: pokemonStore.isFavorite( value )
-  };
-};
-
-/**
  * Manejador para el botón "Go back home" cuando no hay resultados
  * Limpia el texto de búsqueda para mostrar todos los Pokémon nuevamente
  */
 const clickBackHandler = () => {
-  pokemonStore.setSearchText('')
+  pokemonStore.setSearchText( '' );
 };
 </script>
 
@@ -300,20 +200,20 @@ const clickBackHandler = () => {
     <!-- SECCIÓN 1: ESTADO DE CARGA -->
     <!-- Muestra un loader animado mientras se cargan los datos iniciales -->
     <div class="loader" v-if="loading">
-      <img class="animate__animated animate__rotateIn animate__infinite" 
-           src="../assets/images/Loader.svg" 
-           alt="Loading..." 
+      <img class="animate__animated animate__rotateIn animate__infinite"
+           src="../assets/images/Loader.svg"
+           alt="Loading..."
            width="300">
     </div>
 
     <!-- Contenido principal: Se muestra cuando loading = false -->
     <div v-if="!loading">
       <!-- Barra de búsqueda -->
-      <SearchBar  />
+      <SearchBar/>
       <div class="list-container" :class="{ 'no-itmes': filteredItems.length<=0 }">
         <!-- Lista de Pokémon -->
-        <div class="not-found-items" v-if="filteredItems.length<=0">
-          <h2>Uh-oh!</h2>
+        <div class="not-found-items" v-if="filteredItems.length<=0 && pokemonStore.getSearchText ">
+          <h1>Uh-oh!</h1>
           <p>You look lost on your journey!</p>
           <v-btn @click="clickBackHandler"
                  rounded="xl"
@@ -336,13 +236,13 @@ const clickBackHandler = () => {
 
       <!-- Barra de navegación inferior -->
       <BottomBar v-if="filteredItems.length>0"
-          :activeTab="activeTab"
-          @change-tab="handleChangeTab"
+                 :activeTab="activeTab"
+                 @change-tab="handleChangeTab"
       />
     </div>
   </div>
 
-  <Modal :visible="dialog" @close="closeModal" :pokemon="selectePokemon" @toggle-favorite="handlerItemClick"></Modal>
+  <Modal :visible="dialog" @close="closeModal" :pokemon="selectedPokemon" @toggle-favorite="handlerItemClick"></Modal>
 
 </template>
 
